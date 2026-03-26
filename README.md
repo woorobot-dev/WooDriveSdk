@@ -25,25 +25,45 @@ Arduino / Raspberry Pi → RS485 → WooDrive → Motor
 # 📦 Project Structure
 
 WooDriveSdk/
+
 ├─ arduino/
+
 │   ├─ WooDriveSdk.h
+
 │   ├─ WooDriveSdk.cpp
+
 │   └─ examples/
+
 │       ├─ Example01\_BasicCheck/
+
 │       ├─ Example02\_ReadStatus/
+
 │       ├─ Example03\_AutoMotorSetup/
+
 │       ├─ Example04\_Speed/
+
 │       └─ Example05\_Position/
+
 │
+
 ├─ raspberrypi/
+
 │   ├─ Makefile
+
 │   ├─ WooDriveSdk.h
+
 │   ├─ WooDriveSdk.cpp
+
 │   ├─ Example01\_BasicCheck.cpp
+
 │   ├─ Example02\_ReadStatus.cpp
+
 │   ├─ Example03\_AutoMotorSetup.cpp
+
 │   ├─ Example04\_Speed.cpp
+
 │   └─ Example05\_Position.cpp
+
 
 \---
 
