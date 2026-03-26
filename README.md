@@ -28,7 +28,6 @@ WooDriveSdk/
 ├─ arduino/
 
 │   ├─ WooDriveSdk.h
-
 │   ├─ WooDriveSdk.cpp
 
 │   └─ examples/
