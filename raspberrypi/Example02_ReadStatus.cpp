@@ -188,20 +188,6 @@ static void printStatusBlock(const WooDrive::MotorStatus& s)
     printF32("W Phase Current", s.wPhaseCurrent, 3);
 }
 
-static void printStatusLine(const WooDrive::MotorStatus& s, uint8_t fault)
-{
-    std::cout << "F:" << static_cast<unsigned long>(fault);
-    std::cout << " | P:" << std::fixed << std::setprecision(2) << s.position;
-    std::cout << " | V:" << std::fixed << std::setprecision(2) << s.velocity;
-    std::cout << " | Iq:" << std::fixed << std::setprecision(3) << s.iqCurrent;
-    std::cout << " | Id:" << std::fixed << std::setprecision(3) << s.idCurrent;
-    std::cout << " | BusV:" << std::fixed << std::setprecision(2) << s.busVoltage;
-    std::cout << " | Temp:" << std::fixed << std::setprecision(2) << s.temperature;
-    std::cout << " | Pulse:";
-    printI64Raw(s.pulseCount);
-    std::cout << "\n";
-}
-
 // =========================================================
 // READ + PRINT HELPERS
 // =========================================================

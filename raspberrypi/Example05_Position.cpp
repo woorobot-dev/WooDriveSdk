@@ -164,10 +164,10 @@ static bool stopMotor()
 
 static bool monitorStatus(unsigned long durationMs)
 {
-    auto tStart = std::chrono::steady_clock::now();
+    const auto tStart = std::chrono::steady_clock::now();
+    const auto deadline = tStart + std::chrono::milliseconds(durationMs);
 
-    while (std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::steady_clock::now() - tStart).count() < durationMs)
+    while (std::chrono::steady_clock::now() < deadline)
     {
         WooDrive::MotorStatus status;
         uint8_t fault = 0;

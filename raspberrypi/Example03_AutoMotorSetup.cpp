@@ -203,13 +203,13 @@ static void printMotorStatus(const WooDrive::MotorStatus& s)
 
 static bool waitAutoSetupComplete(uint8_t targetId, uint8_t& autoSetupState)
 {
-    auto tStart = std::chrono::steady_clock::now();
+    const auto tStart = std::chrono::steady_clock::now();
+    const auto deadline = tStart + std::chrono::milliseconds(AUTO_SETUP_TIMEOUT_MS);
 
     printTitle("WAIT SETUP");
     std::cout << "Motor setup is running...\n";
 
-    while (std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::steady_clock::now() - tStart).count() < AUTO_SETUP_TIMEOUT_MS)
+    while (std::chrono::steady_clock::now() < deadline)
     {
         if (drive.getAutoMotorSetup(targetId, autoSetupState))
         {
