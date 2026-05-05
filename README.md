@@ -1,135 +1,117 @@
 # WooDrive SDK (Arduino / Raspberry Pi)
 
-BLDC 모터를 간단한 명령으로 제어할 수 있는 WooDrive SDK입니다.  
-FOC 기반 제어를 지원하며, RS-485 통신으로 다양한 환경에서 사용할 수 있습니다.
+Control BLDC motors with simple commands using the WooDrive SDK.
+Supports FOC-based control over RS-485 — works with Arduino and Raspberry Pi.
 
-\---
+---
 
-# 🚀 What you can do
+## What you can do
 
-* BLDC / PMSM 모터 제어
-* 속도 / 위치 / 전류 제어
-* FOC 기반 고성능 제어
-* RS-485 다중 제어기 연결
+- BLDC / PMSM motor control
+- Speed / Position / Current control
+- High-performance FOC-based control
+- Multi-controller daisy-chain via RS-485
 
-👉 복잡한 제어 구현 없이 바로 사용 가능합니다.
+No complex control implementation needed — just send a command and it works.
 
-\---
+---
 
-# 🖼️ System Overview
+## System Overview
 
-Arduino / Raspberry Pi → RS485 → WooDrive → Motor
+```
+Arduino / Raspberry Pi  →  RS-485  →  WooDrive  →  Motor
+```
 
-\---
+---
 
-# 📦 Project Structure
+## Project Structure
 
+```
 WooDriveSdk/
-
 ├─ arduino/
-
 │   ├─ WooDriveSdk.h
-
 │   ├─ WooDriveSdk.cpp
-
 │   └─ examples/
-
-│       ├─ Example01\_BasicCheck/
-
-│       ├─ Example02\_ReadStatus/
-
-│       ├─ Example03\_AutoMotorSetup/
-
-│       ├─ Example04\_Speed/
-
-│       └─ Example05\_Position/
-
+│       ├─ Example01_BasicCheck/
+│       ├─ Example02_ReadStatus/
+│       ├─ Example03_AutoMotorSetup/
+│       ├─ Example04_Speed/
+│       └─ Example05_Position/
 │
-
 ├─ raspberrypi/
-
 │   ├─ Makefile
-
 │   ├─ WooDriveSdk.h
-
 │   ├─ WooDriveSdk.cpp
+│   ├─ Example01_BasicCheck.cpp
+│   ├─ Example02_ReadStatus.cpp
+│   ├─ Example03_AutoMotorSetup.cpp
+│   ├─ Example04_Speed.cpp
+│   └─ Example05_Position.cpp
+```
 
-│   ├─ Example01\_BasicCheck.cpp
+---
 
-│   ├─ Example02\_ReadStatus.cpp
+## Arduino Usage
 
-│   ├─ Example03\_AutoMotorSetup.cpp
+Open the following file in Arduino IDE and upload:
 
-│   ├─ Example04\_Speed.cpp
+```
+arduino/examples/Example01_BasicCheck/Example01_BasicCheck.ino
+```
 
-│   └─ Example05\_Position.cpp
+---
 
+## Raspberry Pi Usage
 
-\---
-
-# 🔵 Arduino Usage
-
-## 사용 방법
-
-Arduino IDE에서:
-
-arduino/examples/Example01\_BasicCheck/Example01\_BasicCheck.ino
-
-👉 열어서 업로드
-
-\---
-
-# 🟢 Raspberry Pi Usage
-
-## 빌드
-
+**Build**
+```bash
 cd raspberrypi
 make
+```
 
-## 실행
+**Run**
+```bash
+./Example01_BasicCheck
+```
 
-./Example01\_BasicCheck
+**Check USB port**
+```bash
+ls /dev/ttyUSB*
+ls /dev/ttyACM*
+```
 
-\---
-
-## USB 포트 확인
-
-ls /dev/ttyUSB\*
-ls /dev/ttyACM\*
-
-\---
-
-## 권한 설정
-
+**Set permissions**
+```bash
 sudo chmod 777 /dev/ttyUSB0
-
-또는
-
+# or
 sudo chmod 777 /dev/ttyACM0
+```
 
-\---
-
-## 문제 해결
-
+**Troubleshooting**
+```bash
 lsusb
 dmesg | tail -n 30
+```
 
-\---
+---
 
-# 📌 Example Overview
+## Example Overview
 
-* Example01\_BasicCheck : 연결 확인
-* Example02\_ReadStatus : 상태 읽기
-* Example03\_AutoMotorSetup : 자동 셋업
-* Example04\_Speed : 속도 제어
-* Example05\_Position : 위치 제어
+| Example | Description |
+|---|---|
+| Example01_BasicCheck | Check connection |
+| Example02_ReadStatus | Read motor status |
+| Example03_AutoMotorSetup | Auto motor setup (no manual tuning) |
+| Example04_Speed | Speed control |
+| Example05_Position | Position control |
 
-\---
+---
 
-# 🎯 Quick Start
+## Quick Start
 
+```bash
 git clone https://github.com/woorobot-dev/WooDriveSdk.git
 cd WooDriveSdk/raspberrypi
 make
-./Example01\_BasicCheck
-
+./Example01_BasicCheck
+```
