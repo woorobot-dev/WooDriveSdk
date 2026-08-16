@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Blocks a commit if arduino/WooDriveSdk.{h,cpp} has drifted from
+# core/WooDriveSdk.{h,cpp}. Installed via `scripts/install-hooks.sh`
+# (sets git's core.hooksPath to this directory).
+#
+# Fix: run scripts/sync-arduino.sh, then `git add arduino/` and retry.
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+if ! "$repo_root/scripts/check-arduino-sync.sh"; then
+    echo ""
+    echo "pre-commit: aborting commit -- arduino/ is out of sync with core/."
+    echo "  Run scripts/sync-arduino.sh, 'git add arduino/', then commit again."
+    exit 1
+fi
