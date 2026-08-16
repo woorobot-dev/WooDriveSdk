@@ -1,0 +1,15 @@
+[build-system]
+requires = ["scikit-build-core>=0.8", "pybind11>=2.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "woodrive"
+version = "0.1.0"
+description = "Python bindings for the WooDrive BLDC motor controller SDK"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+
+[tool.scikit-build]
+wheel.packages = ["woodrive"]
+cmake.source-dir = "."
