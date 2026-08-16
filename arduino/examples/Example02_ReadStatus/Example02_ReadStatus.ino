@@ -123,7 +123,7 @@ static void printMotorConfig(const WooDrive::MotorConfig& s)
     printU8(F("Motor Type"), s.motorType);
     printU8(F("Feedback Type"), s.feedbackType);
     printU8(F("Startup Feedback Type"), s.startupFeedbackType);
-    printU8(F("Direction Invert"), s.directionInvert);
+    printU8(F("Direction/Phase"), s.directionPhase);
     printU8(F("Field Weakening Enable"), s.fieldWeakeningEnable);
     printU8(F("External Brake Present"), s.externalBrakePresent);
     printU8(F("Pole Pairs"), s.polePairs);
@@ -375,7 +375,7 @@ void setup()
     WOO_SERIAL.begin(WOODRIVE_BAUDRATE);
     delay(3000);
 
-    drive.setTimeout(300);
+    drive.setTimeout(100);
 
     printTitle(F("WooDrive Example02 Read Status"));
 

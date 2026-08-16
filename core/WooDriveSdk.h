@@ -79,6 +79,14 @@ enum class InertiaUnit : uint8_t {
     kg_m2
 };
 
+// Protocol V1.1.0, address 0x13 (direction and phase).
+enum class DirectionPhase : uint8_t {
+    Normal = 0x00,
+    DirectionInverted = 0x01,
+    PhaseSwapped = 0x02,
+    DirectionInvertedAndPhaseSwapped = 0x03
+};
+
 class WooDrive
 {
 public:
@@ -107,6 +115,9 @@ public:
     bool getFeedbackType(uint8_t id, uint8_t& outValue);
     bool setStartupFeedbackType(uint8_t id, uint8_t value);
     bool getStartupFeedbackType(uint8_t id, uint8_t& outValue);
+    bool setDirectionPhase(uint8_t id, DirectionPhase value);
+    bool getDirectionPhase(uint8_t id, DirectionPhase& outValue);
+    // Legacy V1.0.3 API. Prefer set/getDirectionPhase for Protocol V1.1.0.
     bool setDirectionInvert(uint8_t id, uint8_t value);
     bool getDirectionInvert(uint8_t id, uint8_t& outValue);
     bool setFieldWeakeningEnable(uint8_t id, uint8_t value);
@@ -313,7 +324,10 @@ public:
         uint8_t  motorType;
         uint8_t  feedbackType;
         uint8_t  startupFeedbackType;
-        uint8_t  directionInvert;
+        union {
+            uint8_t directionPhase;
+            uint8_t directionInvert; // Legacy V1.0.3 field name.
+        };
         uint8_t  fieldWeakeningEnable;
         uint8_t  externalBrakePresent;
         uint8_t  polePairs;
@@ -418,7 +432,7 @@ public:
     bool getBoardConfigAll(uint8_t id, BoardConfig& s);
 
     bool getMotorConfigAll(uint8_t id, uint8_t& motorType, uint8_t& feedbackType, uint8_t& startupFeedbackType,
-                        uint8_t& directionInvert, uint8_t& fieldWeakeningEnable, uint8_t& externalBrakePresent,
+                        uint8_t& directionPhase, uint8_t& fieldWeakeningEnable, uint8_t& externalBrakePresent,
                         uint8_t& polePairs, uint8_t& feedbackDir, uint32_t& feedbackResolution, float& gear);
     bool getMotorConfigAll(uint8_t id, MotorConfig& s);
 
@@ -498,7 +512,8 @@ namespace WooProtocol
     constexpr uint8_t DIR_SET       = 0x01;
     constexpr uint8_t DIR_GET       = 0x02;
     constexpr uint8_t DIR_RSP       = 0x03;
-    constexpr uint8_t DIR_FAULT_RSP = 0x04;
+    constexpr uint8_t DIR_FAULT_RSP = 0x00;
+    constexpr uint8_t DIR_FAULT_RSP_LEGACY = 0x04;
 
     static constexpr size_t MAX_PACKET_SIZE   = 128;
     static constexpr size_t MAX_RESPONSE_DATA = 64;
@@ -550,7 +565,8 @@ constexpr uint8_t MOTOR_TYPE                        = 0x10;
 constexpr uint8_t FEEDBACK_TYPE                     = 0x11;
 constexpr uint8_t STARTUP_FEEDBACK_TYPE             = 0x12;
 
-constexpr uint8_t DIRECTION_INVERT                  = 0x13;
+constexpr uint8_t DIRECTION_PHASE                   = 0x13;
+constexpr uint8_t DIRECTION_INVERT                  = DIRECTION_PHASE; // Legacy V1.0.3 name.
 constexpr uint8_t FIELD_WEAKENING_ENABLE            = 0x14;
 
 constexpr uint8_t EXTERNAL_BRAKE_PRESENT            = 0x15;

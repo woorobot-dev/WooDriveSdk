@@ -19,7 +19,7 @@ int main()
     StdClock wooClock;
     WooDrive drive(serial, wooClock);
 
-    drive.setTimeout(300);
+    drive.setTimeout(100);
 
     std::cout << "=== WooDrive Example01 : Basic Check ===\n";
 

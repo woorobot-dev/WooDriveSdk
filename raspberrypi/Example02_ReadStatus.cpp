@@ -95,7 +95,7 @@ static void printMotorConfig(const WooDrive::MotorConfig& s)
     printU8("Motor Type", s.motorType);
     printU8("Feedback Type", s.feedbackType);
     printU8("Startup Feedback Type", s.startupFeedbackType);
-    printU8("Direction Invert", s.directionInvert);
+    printU8("Direction/Phase", s.directionPhase);
     printU8("Field Weakening Enable", s.fieldWeakeningEnable);
     printU8("External Brake Present", s.externalBrakePresent);
     printU8("Pole Pairs", s.polePairs);
@@ -310,7 +310,7 @@ int main()
         return 1;
     }
 
-    drive.setTimeout(300);
+    drive.setTimeout(100);
 
     printTitle("WooDrive Example02 Read Status");
 

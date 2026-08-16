@@ -1,9 +1,28 @@
 #include "WooDriveSdk.h"
 
+#if !defined(ARDUINO)
+#include <chrono>
+#include <thread>
+#endif
+
 using WooProtocol::Packet;
 using WooProtocol::ResponseFrame;
 using namespace WooProtocol;
 
+namespace {
+// Yield briefly instead of busy-spinning the CPU while waiting for the next
+// serial byte. 1ms is negligible next to typical response timeouts
+// (tens of ms) but keeps readFrame() from pegging a core when the
+// controller is slow to respond or not responding at all.
+void wooSleep1Ms()
+{
+#if defined(ARDUINO)
+    delayMicroseconds(1000);
+#else
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#endif
+}
+}  // namespace
 
 WooDrive::WooDrive(ITransport& transport, IClock& clock)
     : _transport(transport), _clock(clock), _timeoutMs(1000)
@@ -126,7 +145,9 @@ static float rawToInertia(uint32_t raw, InertiaUnit unit)
 bool WooDrive::checkRsp(const ResponseFrame& rsp, uint8_t id, uint8_t addr, uint8_t minLen) const
 {
     if (rsp.id != id) return false;
-    if (rsp.dir != DIR_RSP && rsp.dir != DIR_FAULT_RSP) return false;
+    if (rsp.dir != DIR_RSP &&
+        rsp.dir != DIR_FAULT_RSP &&
+        rsp.dir != DIR_FAULT_RSP_LEGACY) return false;
     if (rsp.cmd != addr) return false;
     if (rsp.dataLen < minLen) return false;
     return true;
@@ -203,7 +224,9 @@ bool WooDrive::sendAndReceive(const Packet& pkt, ResponseFrame& rsp)
             continue;
         }
 
-        if (tmp.dir == DIR_RSP || tmp.dir == DIR_FAULT_RSP) {
+        if (tmp.dir == DIR_RSP ||
+            tmp.dir == DIR_FAULT_RSP ||
+            tmp.dir == DIR_FAULT_RSP_LEGACY) {
             rsp = tmp;
             return true;
         }
@@ -223,6 +246,12 @@ bool WooDrive::readFrame(ResponseFrame& rsp)
     uint32_t start = _clock.nowMs();
 
     while ((_clock.nowMs() - start) < _timeoutMs) {
+        if (_transport.available() <= 0) {
+            // Nothing queued yet -- yield instead of spinning available()
+            // in a tight loop for the rest of the timeout window.
+            wooSleep1Ms();
+            continue;
+        }
         while (_transport.available() > 0) {
             int rv = _transport.read();
             if (rv < 0) {
@@ -422,19 +451,39 @@ bool WooDrive::getStartupFeedbackType(uint8_t id, uint8_t& outValue)
     return true;
 }
 
+bool WooDrive::setDirectionPhase(uint8_t id, DirectionPhase value)
+{
+    const uint8_t rawValue = static_cast<uint8_t>(value);
+    Packet pkt;
+    return makeSetU8(pkt, id, Address::DIRECTION_PHASE, rawValue) && sendOnly(pkt);
+}
+
+bool WooDrive::getDirectionPhase(uint8_t id, DirectionPhase& outValue)
+{
+    Packet pkt;
+    ResponseFrame rsp;
+    if (!makeGetU8(pkt, id, Address::DIRECTION_PHASE) ||
+        !sendAndReceive(pkt, rsp) ||
+        !checkRsp(rsp, id, Address::DIRECTION_PHASE, 1))
+        return false;
+
+    outValue = static_cast<DirectionPhase>(rsp.data[0]);
+    return true;
+}
+
 bool WooDrive::setDirectionInvert(uint8_t id, uint8_t value)
 {
     Packet pkt;
-    return makeSetU8(pkt, id, Address::DIRECTION_INVERT, value) && sendOnly(pkt);
+    return makeSetU8(pkt, id, Address::DIRECTION_PHASE, value) && sendOnly(pkt);
 }
 
 bool WooDrive::getDirectionInvert(uint8_t id, uint8_t& outValue)
 {
     Packet pkt;
     ResponseFrame rsp;
-    if (!makeGetU8(pkt, id, Address::DIRECTION_INVERT) ||
+    if (!makeGetU8(pkt, id, Address::DIRECTION_PHASE) ||
         !sendAndReceive(pkt, rsp) ||
-        !checkRsp(rsp, id, Address::DIRECTION_INVERT, 1))
+        !checkRsp(rsp, id, Address::DIRECTION_PHASE, 1))
         return false;
 
     outValue = beU8(rsp.data);
@@ -2021,7 +2070,7 @@ bool WooDrive::getBoardConfigAll(uint8_t id, BoardConfig& s)
 }
 
 bool WooDrive::getMotorConfigAll(uint8_t id, uint8_t& motorType, uint8_t& feedbackType, uint8_t& startupFeedbackType,
-                                 uint8_t& directionInvert, uint8_t& fieldWeakeningEnable, uint8_t& externalBrakePresent, 
+                                 uint8_t& directionPhase, uint8_t& fieldWeakeningEnable, uint8_t& externalBrakePresent,
                                  uint8_t& polePairs, uint8_t& feedbackDir, uint32_t& feedbackResolution, float& gear)
 {
     Packet pkt;
@@ -2040,7 +2089,7 @@ bool WooDrive::getMotorConfigAll(uint8_t id, uint8_t& motorType, uint8_t& feedba
     motorType            = beU8(&d[idx]);  idx += 1; // 0x10
     feedbackType         = beU8(&d[idx]);  idx += 1; // 0x11
     startupFeedbackType  = beU8(&d[idx]);  idx += 1; // 0x12
-    directionInvert      = beU8(&d[idx]);  idx += 1; // 0x13
+    directionPhase       = beU8(&d[idx]);  idx += 1; // 0x13
     fieldWeakeningEnable = beU8(&d[idx]);  idx += 1; // 0x14
     externalBrakePresent = beU8(&d[idx]);  idx += 1; // 0x15
     polePairs            = beU8(&d[idx]);  idx += 1; // 0x16
@@ -2053,7 +2102,7 @@ bool WooDrive::getMotorConfigAll(uint8_t id, uint8_t& motorType, uint8_t& feedba
 
 bool WooDrive::getMotorConfigAll(uint8_t id, MotorConfig& s)
 {
-    return getMotorConfigAll(id, s.motorType, s.feedbackType, s.startupFeedbackType, s.directionInvert, s.fieldWeakeningEnable, s.externalBrakePresent,
+    return getMotorConfigAll(id, s.motorType, s.feedbackType, s.startupFeedbackType, s.directionPhase, s.fieldWeakeningEnable, s.externalBrakePresent,
                              s.polePairs, s.feedbackDir, s.feedbackResolution, s.gear);
 }
 

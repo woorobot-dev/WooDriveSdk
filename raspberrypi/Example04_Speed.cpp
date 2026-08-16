@@ -249,7 +249,7 @@ int main()
         return 1;
     }
 
-    drive.setTimeout(300);
+    drive.setTimeout(100);
 
     printTitle("WooDrive Example04 Speed");
 

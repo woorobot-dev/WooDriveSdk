@@ -298,7 +298,7 @@ void setup()
     WOO_SERIAL.begin(WOODRIVE_BAUDRATE);  
     delay(5000);
 
-    drive.setTimeout(300);
+    drive.setTimeout(100);
 
     printTitle("WooDrive Example05 Position");
 
