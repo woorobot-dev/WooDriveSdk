@@ -1,0 +1,12 @@
+woodrive:
+  ros__parameters:
+    port: /dev/ttyUSB0
+    baudrate: 9600
+    target_id: 1
+    max_rpm: 100.0
+    accel_ms: 1000
+    decel_ms: 1000
+    motion_mode: 116
+    sub_target: 10.0
+    command_timeout_sec: 0.5
+    auto_setup_pole_pairs: 4

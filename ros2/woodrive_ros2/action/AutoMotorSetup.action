@@ -1,0 +1,10 @@
+uint8 pole_pairs
+float32 timeout_sec
+---
+bool success
+uint8 setup_state
+uint8 fault
+string message
+---
+float32 elapsed_sec
+string state

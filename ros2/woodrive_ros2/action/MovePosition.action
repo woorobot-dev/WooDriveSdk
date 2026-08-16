@@ -1,0 +1,16 @@
+float32 target_deg
+float32 max_rpm
+uint16 accel_ms
+uint16 decel_ms
+float32 timeout_sec
+---
+bool success
+float32 final_position_deg
+float32 moved_deg
+uint8 fault
+string message
+---
+float32 current_position_deg
+float32 moved_deg
+float32 velocity_rpm
+uint8 fault
