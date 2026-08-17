@@ -23,29 +23,31 @@ TEST(CommandUtils, ClampsAndRejectsInvalidInput)
                   std::numeric_limits<float>::quiet_NaN(), 100.0f).direction, 0);
 }
 
-TEST(CommandUtils, AllowsVelocityAndPositionFamilies)
+TEST(CommandUtils, AllowsAllFourModeFamilies)
 {
-    // Vel Curr Abs/Inc, Pos Vel Abs/Inc -- the modes the node already uses.
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x74));
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x75));
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0xF4));
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0xF5));
-    // Time / Time-Left variants in both families are also allowed.
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x78));
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x7D));
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0xF8));
-    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0xFD));
+    // Voltage (0x10-0x1D)
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x10));  // Volt Target Abs
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x11));  // Volt Target Inc
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x14));  // Volt Snap Abs
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x1D));  // Volt Time Left Inc
+    // Current (0x30-0x3D)
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x30));  // Curr Target Abs
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x34));  // Curr Volt Abs
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x3D));  // Curr Time Left Inc
+    // Velocity (0x70-0x7D) -- the mode the node already uses by default.
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x74));  // Vel Curr Abs
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0x7D));  // Vel Time Left Inc
+    // Position (0xF0-0xFD) -- the modes move_absolute/move_relative use.
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0xF4));  // Pos Vel Abs
+    EXPECT_TRUE(woodrive_ros2::isAllowedMotionMode(0xFD));  // Pos Time Left Inc
 }
 
-TEST(CommandUtils, RejectsVoltageAndCurrentDirectDrive)
+TEST(CommandUtils, RejectsUndefinedModeValues)
 {
-    // Voltage-direct-drive (0x10-0x1D) and Current-direct-drive (0x30-0x3D)
-    // have no built-in torque/velocity limiting.
-    EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x10));
-    EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x1D));
-    EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x30));
-    EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x3D));
+    // Not a real mode byte from the protocol's motion mode table.
     EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x00));  // None
+    EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x99));  // garbage
+    EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0xFF));  // garbage
 }
 
 TEST(CommandUtils, KnowsAllGainAndLimitFields)

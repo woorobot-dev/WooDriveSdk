@@ -239,8 +239,10 @@ private:
     // service -- see srv/MotionCommand.srv for the field docs and the
     // "live command, dead-man's-switch applies" contract this shares with
     // setTargetRpm(). Rejects anything operationActive_ (a move/auto_setup
-    // action is running) or outside isAllowedMotionMode()'s Velocity/
-    // Position family allowlist.
+    // action is running) or a motion_mode isAllowedMotionMode() doesn't
+    // recognize (i.e. not a real value from the protocol's motion mode
+    // table -- all four families, including Voltage-direct-drive, are
+    // otherwise accepted; see that function's doc comment).
     void handleMotionCommand(const std::shared_ptr<woodrive_ros2::srv::MotionCommand::Request>& request,
                              const std::shared_ptr<woodrive_ros2::srv::MotionCommand::Response>& response)
     {
@@ -256,8 +258,7 @@ private:
         }
         if (request->direction != 0 && !woodrive_ros2::isAllowedMotionMode(request->motion_mode)) {
             response->success = false;
-            response->message = "motion_mode not in the allowed Velocity/Position family set "
-                                "(Voltage/Current direct-drive modes are rejected)";
+            response->message = "motion_mode is not a value from the protocol's motion mode table";
             return;
         }
 

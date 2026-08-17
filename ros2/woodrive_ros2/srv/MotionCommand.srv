@@ -1,12 +1,15 @@
 # Generic passthrough to WooDrive::setMotorMotionAll() (protocol address
 # 0x94/0x98 group). Lets a caller pick any motion mode from the protocol's
-# Velocity or Position families instead of being locked to this node's
-# defaults (Vel Curr Abs for ~/target_rpm, Pos Vel Abs/Inc for
-# ~/move_absolute and ~/move_relative).
+# motion mode table instead of being locked to this node's defaults
+# (Vel Curr Abs for ~/target_rpm, Pos Vel Abs/Inc for ~/move_absolute and
+# ~/move_relative).
 #
-# Voltage-direct-drive (0x10-0x1D) and Current-direct-drive (0x30-0x3D)
-# modes are REJECTED by the node -- they have no built-in torque/velocity
-# limiting and are not safe to expose through a generic interface.
+# All 32 defined modes across all four families (Voltage 0x10-0x1D,
+# Current 0x30-0x3D, Velocity 0x70-0x7D, Position 0xF0-0xFD) are accepted;
+# only undefined byte values are rejected -- see command_utils.hpp's
+# isAllowedMotionMode() for the family lists and the note on Voltage being
+# open-loop (no built-in current/torque limiting, unlike the other three
+# families).
 #
 # Like ~/target_rpm, a command sent here is "live": the node's usual
 # command_timeout_sec dead-man's-switch applies, so it auto-stops the motor
@@ -19,9 +22,14 @@ uint16 accel_ms
 uint16 decel_ms
 uint8 motion_mode      # See core/WooDriveSdk.h Address::MOTOR_MOTION_MODE /
                         # the protocol doc's motion mode table (p.134-136).
+                        # Voltage family:  0x10,0x11,0x14,0x15,0x18,0x19,0x1C,0x1D
+                        # Current family:  0x30,0x31,0x34,0x35,0x38,0x39,0x3C,0x3D
                         # Velocity family: 0x70,0x71,0x74,0x75,0x78,0x79,0x7C,0x7D
                         # Position family: 0xF0,0xF1,0xF4,0xF5,0xF8,0xF9,0xFC,0xFD
-float32 sub_target      # limiting value (current for Vel Curr*, velocity for Pos Vel*, etc.)
+float32 sub_target      # limiting/secondary value (meaning depends on mode:
+                        # current for Vel Curr*, velocity for Pos Vel*,
+                        # voltage for Curr Volt*, time_ms for *Time*, unused
+                        # for plain Target/Snap modes)
 float32 main_target     # always magnitude only (>= 0); sign comes from direction
 uint8 direction         # 0=DIR_ZERO (decel-to-stop / home), 1=CCW/+, 2=CW/-
 ---

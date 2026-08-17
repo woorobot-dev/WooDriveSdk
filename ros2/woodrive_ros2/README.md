@@ -100,21 +100,29 @@ ros2 action send_goal --feedback \
 
 `~/target_rpm`, `~/move_relative`, and `~/move_absolute` cover the common
 cases (Vel Curr Abs for speed, Pos Vel Abs/Inc for position). For any other
-motion mode from the protocol's Velocity or Position family --
-Vel/Pos Target Abs/Inc, Time Abs/Inc, Time Left Abs/Inc, or Pos Vel Abs/Inc
-with a different sub_target -- call `~/motion_command` directly with the raw
+motion mode from the protocol's motion mode table (p.134-136) -- Voltage,
+Current, Velocity, or Position family, Target/Snap/Time/Time-Left variants,
+Abs or Inc -- call `~/motion_command` directly with the raw
 `setMotorMotionAll()` parameters. Like `~/target_rpm`, this is a "live"
 command: it auto-stops if not repeated within `command_timeout_sec`, so for
 anything that takes longer than that, re-send the same request periodically
 (see examples/speed_node.cpp / examples/position_node.cpp for the polling
-pattern). Voltage-direct-drive (0x10-0x1D) and Current-direct-drive
-(0x30-0x3D) modes are rejected -- they have no built-in torque/velocity
-limiting.
+pattern).
+
+All 32 defined modes are accepted, including Voltage-direct-drive
+(0x10-0x1D) -- unlike the other three families, Voltage bypasses the
+current loop entirely, so nothing regulates the resulting current except
+V/R and back-EMF. Use it deliberately, with a conservative `main_target`
+and `accel_ms`, and watch `~/status`/`~/fault` while doing it.
 
 ```bash
 # Vel Time Abs (0x78 / 120): reach 50 rpm within 3000ms, current-limited to 10A
 ros2 service call /woodrive/motion_command woodrive_ros2/srv/MotionCommand \
   '{accel_ms: 1000, decel_ms: 1000, motion_mode: 120, sub_target: 10.0, main_target: 50.0, direction: 1}'
+
+# Curr Volt Abs (0x34 / 52): reach 2A current, voltage-limited to 24V
+ros2 service call /woodrive/motion_command woodrive_ros2/srv/MotionCommand \
+  '{accel_ms: 500, decel_ms: 500, motion_mode: 52, sub_target: 24.0, main_target: 2.0, direction: 1}'
 ```
 
 ## Gain / limit tuning
