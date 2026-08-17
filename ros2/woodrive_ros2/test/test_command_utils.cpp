@@ -47,3 +47,19 @@ TEST(CommandUtils, RejectsVoltageAndCurrentDirectDrive)
     EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x3D));
     EXPECT_FALSE(woodrive_ros2::isAllowedMotionMode(0x00));  // None
 }
+
+TEST(CommandUtils, KnowsAllGainAndLimitFields)
+{
+    EXPECT_TRUE(woodrive_ros2::isKnownGainLimitField("gain_mode"));
+    EXPECT_TRUE(woodrive_ros2::isKnownGainLimitField("position_p_gain"));
+    EXPECT_TRUE(woodrive_ros2::isKnownGainLimitField("current_i_gain"));
+    EXPECT_TRUE(woodrive_ros2::isKnownGainLimitField("position_ccw_max"));
+    EXPECT_TRUE(woodrive_ros2::isKnownGainLimitField("temperature_max_limit"));
+}
+
+TEST(CommandUtils, RejectsUnknownGainLimitField)
+{
+    EXPECT_FALSE(woodrive_ros2::isKnownGainLimitField(""));
+    EXPECT_FALSE(woodrive_ros2::isKnownGainLimitField("motion_mode"));      // that's a motion_command field, not gain/limit
+    EXPECT_FALSE(woodrive_ros2::isKnownGainLimitField("Position_P_Gain"));  // case-sensitive
+}

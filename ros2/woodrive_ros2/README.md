@@ -117,6 +117,23 @@ ros2 service call /woodrive/motion_command woodrive_ros2/srv/MotionCommand \
   '{accel_ms: 1000, decel_ms: 1000, motion_mode: 120, sub_target: 10.0, main_target: 50.0, direction: 1}'
 ```
 
+## Gain / limit tuning
+
+`~/get_gain_limit` (high-level) reads all 20 gain+limit fields in two
+round-trips (`getMotorGainAll()` + `getMotorLimitAll()`, each already a
+single contiguous register-block read). `~/set_gain_limit_field`
+(low-level) writes exactly one field at a time via the matching individual
+core setter -- see `command_utils.hpp`'s `isKnownGainLimitField()` for the
+full list of accepted field names. No range clamping is applied; this is a
+tuning interface for a human in the loop, not something to script blindly.
+
+```bash
+ros2 service call /woodrive/get_gain_limit woodrive_ros2/srv/GetGainLimit '{}'
+
+ros2 service call /woodrive/set_gain_limit_field woodrive_ros2/srv/SetGainLimitField \
+  '{field: velocity_p_gain, value: 500}'
+```
+
 ## Safety services
 
 ```bash

@@ -26,6 +26,8 @@
 #include "woodrive_ros2/msg/woo_drive_status.hpp"
 #include "woodrive_ros2/srv/basic_check.hpp"
 #include "woodrive_ros2/srv/motion_command.hpp"
+#include "woodrive_ros2/srv/get_gain_limit.hpp"
+#include "woodrive_ros2/srv/set_gain_limit_field.hpp"
 
 using namespace std::chrono_literals;
 
@@ -118,6 +120,18 @@ public:
             [this](const std::shared_ptr<woodrive_ros2::srv::MotionCommand::Request> request,
                    std::shared_ptr<woodrive_ros2::srv::MotionCommand::Response> response) {
                 handleMotionCommand(request, response);
+            });
+        getGainLimitService_ = create_service<woodrive_ros2::srv::GetGainLimit>(
+            "~/get_gain_limit",
+            [this](const std::shared_ptr<woodrive_ros2::srv::GetGainLimit::Request>,
+                   std::shared_ptr<woodrive_ros2::srv::GetGainLimit::Response> response) {
+                handleGetGainLimit(response);
+            });
+        setGainLimitFieldService_ = create_service<woodrive_ros2::srv::SetGainLimitField>(
+            "~/set_gain_limit_field",
+            [this](const std::shared_ptr<woodrive_ros2::srv::SetGainLimitField::Request> request,
+                   std::shared_ptr<woodrive_ros2::srv::SetGainLimitField::Response> response) {
+                handleSetGainLimitField(request, response);
             });
 
         relativeAction_ = makeMoveServer("~/move_relative", true);
@@ -268,6 +282,93 @@ private:
         }
         response->success = true;
         response->message = "motion command sent; will auto-stop if not repeated within command_timeout_sec";
+    }
+
+    // High-level: getMotorGainAll()/getMotorLimitAll() are each already a
+    // single serial round-trip (contiguous register block read) -- this
+    // just combines the two structs into one ROS 2 response.
+    void handleGetGainLimit(const std::shared_ptr<woodrive_ros2::srv::GetGainLimit::Response>& response)
+    {
+        std::lock_guard<std::mutex> lock(serialMutex_);
+        WooDrive::MotorGain gain{};
+        WooDrive::MotorLimit limit{};
+        const bool ok = drive_.getMotorGainAll(targetId_, gain) && drive_.getMotorLimitAll(targetId_, limit);
+        response->success = ok;
+        response->message = ok ? "OK" : "WooDrive did not acknowledge";
+        if (!ok) return;
+
+        response->gain_mode = gain.gainMode;
+        response->position_gain_scale = gain.positionGainScale;
+        response->velocity_gain_scale = gain.velocityGainScale;
+        response->current_gain_scale = gain.currentGainScale;
+        response->position_p_gain = gain.positionPGain;
+        response->velocity_p_gain = gain.velocityPGain;
+        response->velocity_i_gain = gain.velocityIGain;
+        response->current_p_gain = gain.currentPGain;
+        response->current_i_gain = gain.currentIGain;
+
+        response->position_ccw_max = limit.positionCcwMax;
+        response->position_cw_max = limit.positionCwMax;
+        response->velocity_ccw_max = limit.velocityCcwMax;
+        response->velocity_cw_max = limit.velocityCwMax;
+        response->iq_current_ccw_max = limit.iqCurrentCcwMax;
+        response->iq_current_cw_max = limit.iqCurrentCwMax;
+        response->id_current_max = limit.idCurrentMax;
+        response->iq_current_limit = limit.iqCurrentLimit;
+        response->bus_voltage_max_limit = limit.busVoltageMaxLimit;
+        response->bus_voltage_min_limit = limit.busVoltageMinLimit;
+        response->temperature_max_limit = limit.temperatureMaxLimit;
+    }
+
+    // Low-level: dispatches to exactly one of core::WooDrive's individual
+    // gain/limit setters -- see srv/SetGainLimitField.srv and
+    // command_utils.hpp's isKnownGainLimitField() for the field list.
+    void handleSetGainLimitField(const std::shared_ptr<woodrive_ros2::srv::SetGainLimitField::Request>& request,
+                                 const std::shared_ptr<woodrive_ros2::srv::SetGainLimitField::Response>& response)
+    {
+        if (!woodrive_ros2::isKnownGainLimitField(request->field)) {
+            response->success = false;
+            response->message = "unknown field: " + request->field;
+            return;
+        }
+        if (operationActive_) {
+            response->success = false;
+            response->message = "an action (move/auto_setup) is active";
+            return;
+        }
+
+        const std::string& f = request->field;
+        const double v = request->value;
+        const auto u8 = static_cast<uint8_t>(v);
+        const auto u32 = static_cast<uint32_t>(v);
+        const auto f32 = static_cast<float>(v);
+
+        std::lock_guard<std::mutex> lock(serialMutex_);
+        bool ok = false;
+        if (f == "gain_mode") ok = drive_.setGainMode(targetId_, u8);
+        else if (f == "position_gain_scale") ok = drive_.setPositionGainScale(targetId_, u8);
+        else if (f == "velocity_gain_scale") ok = drive_.setVelocityGainScale(targetId_, u8);
+        else if (f == "current_gain_scale") ok = drive_.setCurrentGainScale(targetId_, u8);
+        else if (f == "position_p_gain") ok = drive_.setPositionPGain(targetId_, u32);
+        else if (f == "velocity_p_gain") ok = drive_.setVelocityPGain(targetId_, u32);
+        else if (f == "velocity_i_gain") ok = drive_.setVelocityIGain(targetId_, u32);
+        else if (f == "current_p_gain") ok = drive_.setCurrentPGain(targetId_, u32);
+        else if (f == "current_i_gain") ok = drive_.setCurrentIGain(targetId_, u32);
+        else if (f == "position_ccw_max") ok = drive_.setPositionCcwMax(targetId_, f32);
+        else if (f == "position_cw_max") ok = drive_.setPositionCwMax(targetId_, f32);
+        else if (f == "velocity_ccw_max") ok = drive_.setVelocityCcwMax(targetId_, f32);
+        else if (f == "velocity_cw_max") ok = drive_.setVelocityCwMax(targetId_, f32);
+        else if (f == "iq_current_ccw_max") ok = drive_.setIqCurrentCcwMax(targetId_, f32);
+        else if (f == "iq_current_cw_max") ok = drive_.setIqCurrentCwMax(targetId_, f32);
+        else if (f == "id_current_max") ok = drive_.setIdCurrentMax(targetId_, f32);
+        else if (f == "iq_current_limit") ok = drive_.setIqCurrentLimit(targetId_, f32);
+        else if (f == "bus_voltage_max_limit") ok = drive_.setBusVoltageMaxLimit(targetId_, f32);
+        else if (f == "bus_voltage_min_limit") ok = drive_.setBusVoltageMinLimit(targetId_, f32);
+        else if (f == "temperature_max_limit") ok = drive_.setTemperatureMaxLimit(targetId_, f32);
+        // else: unreachable -- isKnownGainLimitField() already filtered this.
+
+        response->success = ok;
+        response->message = ok ? "field updated" : "WooDrive did not acknowledge";
     }
 
     bool enableLocked()
@@ -551,6 +652,8 @@ private:
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr enableService_;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr brakeService_;
     rclcpp::Service<woodrive_ros2::srv::MotionCommand>::SharedPtr motionCommandService_;
+    rclcpp::Service<woodrive_ros2::srv::GetGainLimit>::SharedPtr getGainLimitService_;
+    rclcpp::Service<woodrive_ros2::srv::SetGainLimitField>::SharedPtr setGainLimitFieldService_;
     rclcpp_action::Server<MovePosition>::SharedPtr relativeAction_;
     rclcpp_action::Server<MovePosition>::SharedPtr absoluteAction_;
     rclcpp_action::Server<AutoSetup>::SharedPtr autoSetupAction_;

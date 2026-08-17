@@ -1,0 +1,26 @@
+# Low-level: generic dispatcher to ONE of core::WooDrive's individual
+# per-register gain/limit setters (setPositionPGain(), setVelocityCcwMax(),
+# etc.) -- one field, one serial round-trip, exactly like calling that
+# setter directly. `field` must be one of the names below (snake_case);
+# unknown names are rejected without touching the serial port.
+#
+# Gain fields (see command_utils.hpp isKnownGainLimitField() for the
+# authoritative list):
+#   gain_mode, position_gain_scale, velocity_gain_scale, current_gain_scale,
+#   position_p_gain, velocity_p_gain, velocity_i_gain, current_p_gain, current_i_gain
+# Limit fields:
+#   position_ccw_max, position_cw_max, velocity_ccw_max, velocity_cw_max,
+#   iq_current_ccw_max, iq_current_cw_max, id_current_max, iq_current_limit,
+#   bus_voltage_max_limit, bus_voltage_min_limit, temperature_max_limit
+#
+# `value` is a plain double regardless of the field's wire type (uint8/
+# uint32/float) -- the node casts it to whatever the target register needs.
+# No range clamping is applied; this is a tuning interface, use with care
+# (see ~/motion_command's docs on why raw setters aren't validated for
+# "sane" values -- that judgment call is left to the caller).
+
+string field
+float64 value
+---
+bool success
+string message

@@ -1,0 +1,31 @@
+# High-level: combines core::WooDrive::getMotorGainAll() + getMotorLimitAll()
+# (each already a single serial round-trip reading a contiguous register
+# block) into one ROS 2 call.
+
+---
+bool success
+string message
+
+# MOTOR GAIN (address 0x50-0x67)
+uint8 gain_mode
+uint8 position_gain_scale
+uint8 velocity_gain_scale
+uint8 current_gain_scale
+uint32 position_p_gain
+uint32 velocity_p_gain
+uint32 velocity_i_gain
+uint32 current_p_gain
+uint32 current_i_gain
+
+# MOTOR LIMIT (address 0x70-0x8D)
+float32 position_ccw_max
+float32 position_cw_max
+float32 velocity_ccw_max
+float32 velocity_cw_max
+float32 iq_current_ccw_max
+float32 iq_current_cw_max
+float32 id_current_max
+float32 iq_current_limit
+float32 bus_voltage_max_limit
+float32 bus_voltage_min_limit
+float32 temperature_max_limit
