@@ -15,6 +15,7 @@ find_package(std_srvs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/WooDriveStatus.msg"
   "srv/BasicCheck.srv"
+  "srv/MotionCommand.srv"
   "action/MovePosition.action"
   "action/AutoMotorSetup.action"
   DEPENDENCIES std_msgs

@@ -25,6 +25,7 @@
 #include "woodrive_ros2/action/move_position.hpp"
 #include "woodrive_ros2/msg/woo_drive_status.hpp"
 #include "woodrive_ros2/srv/basic_check.hpp"
+#include "woodrive_ros2/srv/motion_command.hpp"
 
 using namespace std::chrono_literals;
 
@@ -111,6 +112,12 @@ public:
                 const bool ok = drive_.setMotorBrake(targetId_, request->data ? 1 : 0);
                 response->success = ok;
                 response->message = ok ? "brake state updated" : "WooDrive did not acknowledge";
+            });
+        motionCommandService_ = create_service<woodrive_ros2::srv::MotionCommand>(
+            "~/motion_command",
+            [this](const std::shared_ptr<woodrive_ros2::srv::MotionCommand::Request> request,
+                   std::shared_ptr<woodrive_ros2::srv::MotionCommand::Response> response) {
+                handleMotionCommand(request, response);
             });
 
         relativeAction_ = makeMoveServer("~/move_relative", true);
@@ -212,6 +219,55 @@ private:
             RCLCPP_ERROR(get_logger(), "Failed to send RPM command");
             stopAndDisableLocked();
         }
+    }
+
+    // Generic passthrough to setMotorMotionAll() for the ~/motion_command
+    // service -- see srv/MotionCommand.srv for the field docs and the
+    // "live command, dead-man's-switch applies" contract this shares with
+    // setTargetRpm(). Rejects anything operationActive_ (a move/auto_setup
+    // action is running) or outside isAllowedMotionMode()'s Velocity/
+    // Position family allowlist.
+    void handleMotionCommand(const std::shared_ptr<woodrive_ros2::srv::MotionCommand::Request>& request,
+                             const std::shared_ptr<woodrive_ros2::srv::MotionCommand::Response>& response)
+    {
+        if (operationActive_) {
+            response->success = false;
+            response->message = "an action (move/auto_setup) is active";
+            return;
+        }
+        if (request->direction > 2) {
+            response->success = false;
+            response->message = "direction must be 0 (DIR_ZERO), 1 (CCW/+), or 2 (CW/-)";
+            return;
+        }
+        if (request->direction != 0 && !woodrive_ros2::isAllowedMotionMode(request->motion_mode)) {
+            response->success = false;
+            response->message = "motion_mode not in the allowed Velocity/Position family set "
+                                "(Voltage/Current direct-drive modes are rejected)";
+            return;
+        }
+
+        std::lock_guard<std::mutex> lock(serialMutex_);
+        lastCommand_ = now();
+
+        if (request->direction == 0) {
+            response->success = stopAndDisableLocked();
+            response->message = response->success ? "DIR_ZERO sent (decelerate/home)"
+                                                   : "WooDrive did not acknowledge";
+            return;
+        }
+
+        if (!enableLocked() ||
+            !drive_.setMotorMotionAll(targetId_, request->accel_ms, request->decel_ms,
+                                      request->motion_mode, request->sub_target,
+                                      request->main_target, request->direction)) {
+            response->success = false;
+            response->message = "WooDrive did not acknowledge motion command";
+            stopAndDisableLocked();
+            return;
+        }
+        response->success = true;
+        response->message = "motion command sent; will auto-stop if not repeated within command_timeout_sec";
     }
 
     bool enableLocked()
@@ -494,6 +550,7 @@ private:
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stopService_;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr enableService_;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr brakeService_;
+    rclcpp::Service<woodrive_ros2::srv::MotionCommand>::SharedPtr motionCommandService_;
     rclcpp_action::Server<MovePosition>::SharedPtr relativeAction_;
     rclcpp_action::Server<MovePosition>::SharedPtr absoluteAction_;
     rclcpp_action::Server<AutoSetup>::SharedPtr autoSetupAction_;

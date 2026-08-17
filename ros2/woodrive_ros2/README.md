@@ -96,6 +96,27 @@ ros2 action send_goal --feedback \
   '{target_deg: 0.0, max_rpm: 20.0, accel_ms: 1000, decel_ms: 1000, timeout_sec: 30.0}'
 ```
 
+## Generic motion command
+
+`~/target_rpm`, `~/move_relative`, and `~/move_absolute` cover the common
+cases (Vel Curr Abs for speed, Pos Vel Abs/Inc for position). For any other
+motion mode from the protocol's Velocity or Position family --
+Vel/Pos Target Abs/Inc, Time Abs/Inc, Time Left Abs/Inc, or Pos Vel Abs/Inc
+with a different sub_target -- call `~/motion_command` directly with the raw
+`setMotorMotionAll()` parameters. Like `~/target_rpm`, this is a "live"
+command: it auto-stops if not repeated within `command_timeout_sec`, so for
+anything that takes longer than that, re-send the same request periodically
+(see examples/speed_node.cpp / examples/position_node.cpp for the polling
+pattern). Voltage-direct-drive (0x10-0x1D) and Current-direct-drive
+(0x30-0x3D) modes are rejected -- they have no built-in torque/velocity
+limiting.
+
+```bash
+# Vel Time Abs (0x78 / 120): reach 50 rpm within 3000ms, current-limited to 10A
+ros2 service call /woodrive/motion_command woodrive_ros2/srv/MotionCommand \
+  '{accel_ms: 1000, decel_ms: 1000, motion_mode: 120, sub_target: 10.0, main_target: 50.0, direction: 1}'
+```
+
 ## Safety services
 
 ```bash

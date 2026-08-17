@@ -1,0 +1,29 @@
+# Generic passthrough to WooDrive::setMotorMotionAll() (protocol address
+# 0x94/0x98 group). Lets a caller pick any motion mode from the protocol's
+# Velocity or Position families instead of being locked to this node's
+# defaults (Vel Curr Abs for ~/target_rpm, Pos Vel Abs/Inc for
+# ~/move_absolute and ~/move_relative).
+#
+# Voltage-direct-drive (0x10-0x1D) and Current-direct-drive (0x30-0x3D)
+# modes are REJECTED by the node -- they have no built-in torque/velocity
+# limiting and are not safe to expose through a generic interface.
+#
+# Like ~/target_rpm, a command sent here is "live": the node's usual
+# command_timeout_sec dead-man's-switch applies, so it auto-stops the motor
+# if this service isn't called again within that window. For a motion that
+# takes longer than command_timeout_sec, re-issue the same request
+# periodically (e.g. every 200ms) until done -- see examples/speed_node.cpp
+# and examples/position_node.cpp for the same polling pattern.
+
+uint16 accel_ms
+uint16 decel_ms
+uint8 motion_mode      # See core/WooDriveSdk.h Address::MOTOR_MOTION_MODE /
+                        # the protocol doc's motion mode table (p.134-136).
+                        # Velocity family: 0x70,0x71,0x74,0x75,0x78,0x79,0x7C,0x7D
+                        # Position family: 0xF0,0xF1,0xF4,0xF5,0xF8,0xF9,0xFC,0xFD
+float32 sub_target      # limiting value (current for Vel Curr*, velocity for Pos Vel*, etc.)
+float32 main_target     # always magnitude only (>= 0); sign comes from direction
+uint8 direction         # 0=DIR_ZERO (decel-to-stop / home), 1=CCW/+, 2=CW/-
+---
+bool success
+string message
