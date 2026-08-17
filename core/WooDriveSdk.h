@@ -87,6 +87,16 @@ enum class DirectionPhase : uint8_t {
     DirectionInvertedAndPhaseSwapped = 0x03
 };
 
+// Protocol V1.1.0, address 0x00 (reset). setReset() takes one of these
+// action codes, not an arbitrary value -- 0xAA is NOT a valid trigger, it is
+// only the idle/default readback value getReset() returns when nothing is
+// pending (see protocol doc "4-가-1-가" for the SET/GET/RSP wire examples).
+enum class ResetCommand : uint8_t {
+    SoftwareReset = 0x01,  // Restarts the controller.
+    PositionReset = 0x02,  // Zeroes the current position.
+    FactoryReset = 0xAB    // Restores all settings to factory defaults.
+};
+
 class WooDrive
 {
 public:
@@ -96,6 +106,7 @@ public:
     uint32_t timeout() const;
 
     // BOARD CONFIG
+    // value must be one of ResetCommand's action codes (0x01/0x02/0xAB).
     bool setReset(uint8_t id, uint8_t value);
     bool getReset(uint8_t id, uint8_t& outValue);
     bool setId(uint8_t id, uint8_t value);
