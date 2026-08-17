@@ -337,6 +337,12 @@ bool WooDrive::getFault(uint8_t id, uint8_t& outValue)
     return true;
 }
 
+bool WooDrive::clearFault(uint8_t id)
+{
+    Packet pkt;
+    return makeSetU8(pkt, id, Address::FAULT, 0x00) && sendOnly(pkt);
+}
+
 bool WooDrive::setCommunicationMode(uint8_t id, uint8_t value)
 {
     Packet pkt;

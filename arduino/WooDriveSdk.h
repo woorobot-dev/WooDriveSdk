@@ -112,6 +112,9 @@ public:
     bool setId(uint8_t id, uint8_t value);
     bool getId(uint8_t id, uint8_t& outValue);
     bool getFault(uint8_t id, uint8_t& outValue);
+    // Address 0x02 is R/A: writing 0x00 clears the current fault. Other
+    // values are not documented as valid and should not be relied on.
+    bool clearFault(uint8_t id);
     bool setCommunicationMode(uint8_t id, uint8_t value);
     bool getCommunicationMode(uint8_t id, uint8_t& outValue);
     bool setCommunicationWatchdog(uint8_t id, uint16_t value);
