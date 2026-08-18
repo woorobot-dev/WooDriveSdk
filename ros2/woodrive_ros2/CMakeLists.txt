@@ -61,6 +61,23 @@ foreach(example ${WOODRIVE_EXAMPLES})
   install(TARGETS ${example} DESTINATION lib/${PROJECT_NAME})
 endforeach()
 
+# Growing playground nodes -- not part of the fixed Example01-05 parity set
+# above, expected to keep expanding (currently: 2-wheel diff-drive robot
+# groundwork, dual-motor comm/control).
+set(WOODRIVE_DEV_NODES
+  dual_motor_node
+)
+foreach(dev_node ${WOODRIVE_DEV_NODES})
+  add_executable(${dev_node}
+    dev/${dev_node}.cpp
+    ../../core/WooDriveSdk.cpp
+  )
+  target_include_directories(${dev_node} PRIVATE ../../core)
+  target_compile_options(${dev_node} PRIVATE -Wall -Wextra -Wpedantic)
+  ament_target_dependencies(${dev_node} rclcpp)
+  install(TARGETS ${dev_node} DESTINATION lib/${PROJECT_NAME})
+endforeach()
+
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_command_utils test/test_command_utils.cpp)
