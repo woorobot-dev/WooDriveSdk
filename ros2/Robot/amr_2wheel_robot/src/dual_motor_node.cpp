@@ -1,9 +1,9 @@
-// Growing playground node -- starting point for this 2-wheel diff-drive
-// robot's control code. Lives in its own package (woodrive_diffdrive),
+// Growing playground node -- starting point for this 2-wheel AMR's control
+// code. Lives in its own package (amr_2wheel_robot, under ros2/Robot/),
 // separate from woodrive_ros2 (the generic, robot-agnostic WooDrive SDK
 // package) -- this file is robot-specific (hardcodes the "left/right
 // wheel" concept), so it doesn't belong inside the SDK's package. It links
-// directly against ../../core/ (the same SDK woodrive_ros2 uses), not
+// directly against ../../../core/ (the same SDK woodrive_ros2 uses), not
 // against the woodrive_ros2 package itself.
 //
 // Current state: dual-motor comm/control now; /cmd_vel -> per-wheel
@@ -26,7 +26,7 @@
 // added second controller off the default ID before wiring both in.
 //
 // Run:
-//   ros2 run woodrive_diffdrive dual_motor_node --ros-args -p port:=/dev/ttyUSB0 -p baudrate:=1000000 -p left_id:=1 -p right_id:=2
+//   ros2 run amr_2wheel_robot dual_motor_node --ros-args -p port:=/dev/ttyUSB0 -p baudrate:=1000000 -p left_id:=1 -p right_id:=2
 
 #include "WooDriveSdk.h"
 

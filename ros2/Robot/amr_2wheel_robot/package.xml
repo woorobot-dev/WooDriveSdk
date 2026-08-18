@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>woodrive_diffdrive</name>
+  <name>amr_2wheel_robot</name>
   <version>0.1.0</version>
-  <description>2-wheel differential-drive robot built on WooDriveSdk. Robot-specific (wheel layout, kinematics, /cmd_vel, /odom) -- depends on woodrive_ros2's generic single-controller SDK, does not modify it.</description>
+  <description>2-wheeled AMR (Autonomous Mobile Robot) built on WooDriveSdk. Robot-specific (wheel layout, kinematics, /cmd_vel, /odom) -- depends on woodrive_ros2's generic single-controller SDK, does not modify it.</description>
   <maintainer email="dev@woorobot.com">WooRobot</maintainer>
   <license>MIT</license>
 

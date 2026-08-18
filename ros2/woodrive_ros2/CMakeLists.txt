@@ -63,10 +63,11 @@ endforeach()
 
 # Growing playground nodes -- not part of the fixed Example01-05 parity set
 # above. These are generic SDK utilities (not robot-specific); robot-
-# specific work (e.g. the 2-wheel diff-drive robot) lives in its own
-# package -- see ../woodrive_diffdrive.
+# specific work (e.g. the 2-wheel AMR) lives in its own package under
+# ../Robot/ -- see ../Robot/amr_2wheel_robot.
 set(WOODRIVE_DEV_NODES
   set_id_node
+  raw_io_check_node
 )
 foreach(dev_node ${WOODRIVE_DEV_NODES})
   add_executable(${dev_node}

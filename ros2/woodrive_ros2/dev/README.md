@@ -2,10 +2,10 @@
 
 Growing playground for **generic, robot-agnostic** WooDrive SDK utilities --
 not the stable Example01-05 parity set (see `../examples/README.md` for
-those), and not robot-specific code either (that lives in its own package,
-e.g. `../../woodrive_diffdrive` for the 2-wheel differential-drive robot --
-robot-specific code doesn't belong inside the SDK's package, so if a tool
-here starts assuming a particular robot's layout, move it out).
+those), and not robot-specific code either (that lives in its own package
+under `../../Robot/`, e.g. `../../Robot/amr_2wheel_robot` for the 2-wheel
+AMR -- robot-specific code doesn't belong inside the SDK's package, so if
+a tool here starts assuming a particular robot's layout, move it out).
 
 Current contents:
 

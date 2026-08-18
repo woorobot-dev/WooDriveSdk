@@ -1,12 +1,14 @@
-# woodrive_diffdrive
+# amr_2wheel_robot
 
-Robot-specific package for a 2-wheel differential-drive robot built on two
-WooDrive controllers (one per wheel, distinct protocol IDs on one RS-485
-bus). Kept **separate** from `woodrive_ros2` (the generic, robot-agnostic
-WooDrive SDK package) on purpose -- this package hardcodes robot-specific
+Robot-specific package for a 2-wheel AMR (Autonomous Mobile Robot) built on
+two WooDrive controllers (one per wheel, distinct protocol IDs on one
+RS-485 bus). Lives under `ros2/Robot/` -- a grouping folder for
+robot-level packages, as opposed to `ros2/woodrive_ros2` (the generic,
+robot-agnostic WooDrive SDK package). Kept **separate** from
+`woodrive_ros2` on purpose -- this package hardcodes robot-specific
 concepts (left/right wheel, eventually wheel radius/separation for
 kinematics and odometry) that don't belong inside a generic SDK. It links
-directly against `../../core/` (the same SDK `woodrive_ros2` uses).
+directly against `../../../core/` (the same SDK `woodrive_ros2` uses).
 
 ## Current state
 
@@ -35,6 +37,6 @@ directly against `../../core/` (the same SDK `woodrive_ros2` uses).
 ## Run
 
 ```bash
-ros2 run woodrive_diffdrive dual_motor_node --ros-args \
+ros2 run amr_2wheel_robot dual_motor_node --ros-args \
   -p port:=/dev/ttyUSB0 -p baudrate:=1000000 -p left_id:=1 -p right_id:=2
 ```
