@@ -7,6 +7,8 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 # Depends directly on core/ (same as woodrive_ros2) -- not on the
 # woodrive_ros2 *package*, since this robot doesn't need woodrive_ros2's
@@ -16,9 +18,20 @@ add_executable(dual_motor_node
   src/dual_motor_node.cpp
   ../../../core/WooDriveSdk.cpp
 )
-target_include_directories(dual_motor_node PRIVATE ../../../core)
+target_include_directories(dual_motor_node PRIVATE
+  include
+  ../../../core
+)
 target_compile_options(dual_motor_node PRIVATE -Wall -Wextra -Wpedantic)
-ament_target_dependencies(dual_motor_node rclcpp)
+ament_target_dependencies(dual_motor_node rclcpp std_msgs std_srvs)
 install(TARGETS dual_motor_node DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_motor_command_utils test/test_motor_command_utils.cpp)
+  target_include_directories(test_motor_command_utils PRIVATE include)
+endif()
 
 ament_package()

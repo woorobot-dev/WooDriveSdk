@@ -1,0 +1,34 @@
+# Stage 1 config for dual_motor_node -- left/right WooDrive dual-axis
+# control foundation. No kinematics values (wheel_radius, wheel_separation)
+# yet -- see README.md, that's Stage 2 (/cmd_vel) scope.
+dual_motor_node:
+  ros__parameters:
+    # ----- Communication -----
+    port: "/dev/ttyUSB0"
+    baudrate: 1000000            # must match what the controllers are actually set to (see README)
+
+    # ----- Device identity -----
+    left_id: 1                   # WooDrive protocol ID wired as the left wheel
+    right_id: 2                  # WooDrive protocol ID wired as the right wheel
+
+    # ----- Mechanical mounting -----
+    # Flip to true if that wheel spins the "wrong" way for its physical
+    # mounting -- keeps the ROS-facing sign convention (positive = forward)
+    # consistent regardless of which way the motor happens to be bolted on.
+    left_invert: false
+    right_invert: false
+
+    # ----- Default control mode -----
+    # 116 (0x74) = Vel Curr Abs: current-limited absolute velocity target.
+    # See core/WooDriveSdk.h / the protocol doc's motion mode table.
+    motion_mode: 116
+    sub_target: 5.0               # current limit (A) for that mode
+    accel_ms: 500
+    decel_ms: 500
+
+    # ----- Safety -----
+    max_rpm: 100.0                # commanded rpm is clamped to +/- this
+    command_timeout_ms: 500       # no target_rpm refresh within this window -> 0 rpm
+
+    # ----- Manual testing -----
+    test_rpm: 20.0                 # suggested first value, see README "Testing"

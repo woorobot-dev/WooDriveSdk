@@ -2,12 +2,26 @@
 <package format="3">
   <name>amr_2wheel_robot</name>
   <version>0.1.0</version>
-  <description>2-wheeled AMR (Autonomous Mobile Robot) built on WooDriveSdk. Robot-specific (wheel layout, kinematics, /cmd_vel, /odom) -- depends on woodrive_ros2's generic single-controller SDK, does not modify it.</description>
+  <description>
+    2-wheeled AMR (Autonomous Mobile Robot) built on WooDriveSdk.
+    Stage 1: left/right WooDrive dual-axis control foundation (individual
+    enable/disable and speed commands, safety watchdog). Robot-specific --
+    depends on core/ directly (the same SDK woodrive_ros2 uses), not on the
+    woodrive_ros2 package. No /cmd_vel, kinematics, odometry, or TF yet --
+    see the package README.
+  </description>
   <maintainer email="dev@woorobot.com">WooRobot</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
