@@ -62,10 +62,11 @@ foreach(example ${WOODRIVE_EXAMPLES})
 endforeach()
 
 # Growing playground nodes -- not part of the fixed Example01-05 parity set
-# above, expected to keep expanding (currently: 2-wheel diff-drive robot
-# groundwork, dual-motor comm/control).
+# above. These are generic SDK utilities (not robot-specific); robot-
+# specific work (e.g. the 2-wheel diff-drive robot) lives in its own
+# package -- see ../woodrive_diffdrive.
 set(WOODRIVE_DEV_NODES
-  dual_motor_node
+  set_id_node
 )
 foreach(dev_node ${WOODRIVE_DEV_NODES})
   add_executable(${dev_node}

@@ -1,9 +1,13 @@
-// Growing playground node -- starting point for the 2-wheel diff-drive
-// robot. Not part of the raspberrypi/arduino Example01-05 parity set (see
-// examples/README.md for those); this one is expected to keep growing:
-// dual-motor comm/control now, /cmd_vel -> per-wheel kinematics and /odom
-// later, eventually becoming (or feeding) a dedicated woodrive_diffdrive
-// package. See dev/README.md for the overall plan.
+// Growing playground node -- starting point for this 2-wheel diff-drive
+// robot's control code. Lives in its own package (woodrive_diffdrive),
+// separate from woodrive_ros2 (the generic, robot-agnostic WooDrive SDK
+// package) -- this file is robot-specific (hardcodes the "left/right
+// wheel" concept), so it doesn't belong inside the SDK's package. It links
+// directly against ../../core/ (the same SDK woodrive_ros2 uses), not
+// against the woodrive_ros2 package itself.
+//
+// Current state: dual-motor comm/control now; /cmd_vel -> per-wheel
+// kinematics and /odom is the next planned step.
 //
 // Architecture (see the session's comm_control_demo.cpp prototype this is
 // based on): a dedicated comm thread owns the RS-485 bus exclusively and
@@ -16,11 +20,13 @@
 // is never blocked waiting on a serial round-trip.
 //
 // Defaults to 1,000,000 bps -- the whole reason to split into two IDs on
-// one bus is this tight loop, which needs the faster bus (see dev/README.md
-// for why 9600 makes a 1-10ms cycle physically impossible).
+// one bus is this tight loop, which needs the faster bus (9600 makes a
+// 1-10ms cycle physically impossible -- see woodrive_ros2/dev/README.md
+// for the numbers). Use woodrive_ros2's dev/set_id_node to move a freshly-
+// added second controller off the default ID before wiring both in.
 //
 // Run:
-//   ros2 run woodrive_ros2 dual_motor_node --ros-args -p port:=/dev/ttyUSB0 -p baudrate:=1000000 -p left_id:=1 -p right_id:=2
+//   ros2 run woodrive_diffdrive dual_motor_node --ros-args -p port:=/dev/ttyUSB0 -p baudrate:=1000000 -p left_id:=1 -p right_id:=2
 
 #include "WooDriveSdk.h"
 
@@ -83,7 +89,7 @@ void commThreadFunc(WooDrive& drive, uint8_t leftId, uint8_t rightId,
     while (g_running) {
         pollAndCommand(leftId, left);
         pollAndCommand(rightId, right);
-        std::this_thread::sleep_for(5ms);  // bus-limited cadence, see dev/README.md
+        std::this_thread::sleep_for(5ms);  // bus-limited cadence
     }
     RCLCPP_INFO(g_node->get_logger(), "[comm] thread exiting");
 }
@@ -106,7 +112,8 @@ void printWheel(const char* label, const WheelState& wheelConst)
 
 // All node-owning work lives here so g_node is reset (and the underlying
 // rclcpp::Node destroyed) strictly before rclcpp::shutdown() runs in main()
-// -- see the other examples for why (node-destroyed-after-shutdown segfault).
+// -- a node destroyed after shutdown() tears down against an already-
+// finalized rmw/DDS context and segfaults.
 int run()
 {
     const std::string port = g_node->declare_parameter<std::string>("port", "/dev/ttyUSB0");
