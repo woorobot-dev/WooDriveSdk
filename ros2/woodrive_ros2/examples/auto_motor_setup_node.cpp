@@ -1,4 +1,4 @@
-// ROS 2 equivalent of raspberrypi/Example03_AutoMotorSetup.cpp.
+// ROS 2 equivalent of linux/examples/Example03_AutoMotorSetup.cpp.
 // A simple, one-shot node: run the controller's auto motor setup procedure,
 // poll for completion, print the result, exit. No topics/services/actions
 // -- see src/woodrive_node.cpp's ~/auto_setup action for the persistent,

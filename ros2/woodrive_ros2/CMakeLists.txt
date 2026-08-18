@@ -41,8 +41,8 @@ install(TARGETS woodrive_node DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
 
 # Simple, one-shot example nodes (no topics/services/actions) mirroring
-# raspberrypi/Example01..05 -- see examples/README.md. woodrive_node above
-# is the persistent, full-featured driver; these are onboarding material.
+# linux/examples/Example01..05 -- see examples/README.md. woodrive_node
+# above is the persistent, full-featured driver; these are onboarding material.
 set(WOODRIVE_EXAMPLES
   basic_check_node
   read_status_node
@@ -61,23 +61,23 @@ foreach(example ${WOODRIVE_EXAMPLES})
   install(TARGETS ${example} DESTINATION lib/${PROJECT_NAME})
 endforeach()
 
-# Growing playground nodes -- not part of the fixed Example01-05 parity set
-# above. These are generic SDK utilities (not robot-specific); robot-
+# Diagnostic/setup utilities -- not part of the fixed Example01-05 parity
+# set above. These are generic SDK tools (not robot-specific); robot-
 # specific work (e.g. the 2-wheel AMR) lives in its own package under
-# ../Robot/ -- see ../Robot/amr_2wheel_robot.
-set(WOODRIVE_DEV_NODES
+# ../projects/ -- see ../projects/amr_2wheel_robot.
+set(WOODRIVE_TOOLS
   set_id_node
   raw_io_check_node
 )
-foreach(dev_node ${WOODRIVE_DEV_NODES})
-  add_executable(${dev_node}
-    dev/${dev_node}.cpp
+foreach(tool_node ${WOODRIVE_TOOLS})
+  add_executable(${tool_node}
+    tools/${tool_node}.cpp
     ../../core/WooDriveSdk.cpp
   )
-  target_include_directories(${dev_node} PRIVATE ../../core)
-  target_compile_options(${dev_node} PRIVATE -Wall -Wextra -Wpedantic)
-  ament_target_dependencies(${dev_node} rclcpp)
-  install(TARGETS ${dev_node} DESTINATION lib/${PROJECT_NAME})
+  target_include_directories(${tool_node} PRIVATE ../../core)
+  target_compile_options(${tool_node} PRIVATE -Wall -Wextra -Wpedantic)
+  ament_target_dependencies(${tool_node} rclcpp)
+  install(TARGETS ${tool_node} DESTINATION lib/${PROJECT_NAME})
 endforeach()
 
 if(BUILD_TESTING)

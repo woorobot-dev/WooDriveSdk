@@ -1,4 +1,4 @@
-// ROS 2 equivalent of raspberrypi/Example01_BasicCheck.cpp.
+// ROS 2 equivalent of linux/examples/Example01_BasicCheck.cpp.
 // A simple, one-shot node: connect, read ID and fault, print the result,
 // exit. No topics/services/actions -- see src/woodrive_node.cpp for the
 // full, persistent driver.

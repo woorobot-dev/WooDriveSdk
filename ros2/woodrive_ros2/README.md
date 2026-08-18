@@ -7,7 +7,7 @@ This package has two things:
   messages, and actions, with a 200ms watchdog that auto-stops the motor on a
   command timeout or a fault. Use this to actually run a robot.
 - **`examples/`** ([README](examples/README.md)) -- five small, standalone
-  nodes with no topics/services/actions, one per raspberrypi/arduino example
+  nodes with no topics/services/actions, one per linux/arduino example
   (BasicCheck, ReadStatus, AutoMotorSetup, Speed, Position). Use these to learn
   the SDK or bring up a new controller without the driver's complexity.
 

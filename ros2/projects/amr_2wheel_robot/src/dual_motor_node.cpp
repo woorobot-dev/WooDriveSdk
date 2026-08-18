@@ -1,5 +1,5 @@
 // Growing playground node -- starting point for this 2-wheel AMR's control
-// code. Lives in its own package (amr_2wheel_robot, under ros2/Robot/),
+// code. Lives in its own package (amr_2wheel_robot, under ros2/projects/),
 // separate from woodrive_ros2 (the generic, robot-agnostic WooDrive SDK
 // package) -- this file is robot-specific (hardcodes the "left/right
 // wheel" concept), so it doesn't belong inside the SDK's package. It links
@@ -21,8 +21,8 @@
 //
 // Defaults to 1,000,000 bps -- the whole reason to split into two IDs on
 // one bus is this tight loop, which needs the faster bus (9600 makes a
-// 1-10ms cycle physically impossible -- see woodrive_ros2/dev/README.md
-// for the numbers). Use woodrive_ros2's dev/set_id_node to move a freshly-
+// 1-10ms cycle physically impossible -- see woodrive_ros2/tools/README.md
+// for the numbers). Use woodrive_ros2's tools/set_id_node to move a freshly-
 // added second controller off the default ID before wiring both in.
 //
 // Run:

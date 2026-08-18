@@ -49,21 +49,27 @@ WooDriveSdk/
 │       ├─ Example04_Speed/
 │       └─ Example05_Position/
 │
-├─ raspberrypi/                   # Linux examples, builds against ../core
+├─ linux/                         # General POSIX/Linux examples (Raspberry Pi, Jetson,
+│   │                              #  Ubuntu PC, ...), builds against ../core
 │   ├─ Makefile
-│   ├─ Example01_BasicCheck.cpp
-│   ├─ Example02_ReadStatus.cpp
-│   ├─ Example03_AutoMotorSetup.cpp
-│   ├─ Example04_Speed.cpp
-│   └─ Example05_Position.cpp
+│   └─ examples/
+│       ├─ Example01_BasicCheck.cpp
+│       ├─ Example02_ReadStatus.cpp
+│       ├─ Example03_AutoMotorSetup.cpp
+│       ├─ Example04_Speed.cpp
+│       └─ Example05_Position.cpp
 │
 ├─ windows/                       # Windows examples, builds against ../core
 │   ├─ CMakeLists.txt
 │   ├─ BasicCheck.cpp / LowSpeedRun.cpp / Continuous20Rpm.cpp / Position360.cpp
 │
-├─ ros2/woodrive_ros2/            # ROS 2 package, builds against ../../core
-│   ├─ src/woodrive_node.cpp       # persistent driver: topics/services/actions + watchdog
-│   └─ examples/                   # 5 standalone nodes, no topics/services (see its README)
+├─ ros2/                          # colcon workspace container -- no package.xml of its own
+│   ├─ woodrive_ros2/              # generic, robot-agnostic WooDrive SDK package
+│   │   ├─ src/woodrive_node.cpp    # persistent driver: topics/services/actions + watchdog
+│   │   ├─ examples/                # 5 standalone nodes, no topics/services (see its README)
+│   │   └─ tools/                   # diagnostic/setup utilities (see its README)
+│   └─ projects/                   # robot-specific applications, each its own ROS 2 package
+│       └─ amr_2wheel_robot/        # 2-wheel AMR built on woodrive_ros2 (see its README)
 │
 ├─ python/                        # pybind11 bindings over core/ (in progress)
 │
@@ -82,11 +88,13 @@ arduino/examples/Example01_BasicCheck/Example01_BasicCheck.ino
 
 ---
 
-## Raspberry Pi Usage
+## Linux Usage
+
+Any POSIX/Linux environment -- Raspberry Pi, NVIDIA Jetson, Ubuntu PC, etc.
 
 **Build**
 ```bash
-cd raspberrypi
+cd linux
 make
 ```
 
@@ -132,7 +140,7 @@ dmesg | tail -n 30
 
 ```bash
 git clone https://github.com/woorobot-dev/WooDriveSdk.git
-cd WooDriveSdk/raspberrypi
+cd WooDriveSdk/linux
 make
 ./Example01_BasicCheck
 ```
@@ -140,13 +148,15 @@ make
 ## Windows / ROS 2 / Python
 
 - **Windows**: `cd windows && cmake -B build && cmake --build build` (see `windows/CMakeLists.txt`).
-- **ROS 2**: `colcon build --packages-select woodrive_ros2` from a workspace containing `ros2/woodrive_ros2`.
+- **ROS 2**: `colcon build --base-paths ros2` from a colcon workspace -- builds both
+  `woodrive_ros2` (the generic SDK package) and any packages under `ros2/projects/`
+  (e.g. `amr_2wheel_robot`). Use `--packages-select woodrive_ros2` to build just the SDK.
 - **Python**: see `python/README.md` (pybind11 bindings over `core/`, work in progress).
 
 ## Contributing to core/
 
 `core/WooDriveSdk.{h,cpp}` is the single source of truth for the protocol.
-`raspberrypi/`, `windows/` and `ros2/` all build it directly by relative path,
+`linux/`, `windows/` and `ros2/` all build it directly by relative path,
 so changes there apply everywhere automatically. `arduino/` is the one
 exception — the Arduino Library Manager needs a self-contained folder, so
 `arduino/WooDriveSdk.{h,cpp}` is a **generated copy** of `core/`:

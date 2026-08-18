@@ -3,7 +3,7 @@
 #
 # The Arduino Library Manager requires a self-contained library folder, so
 # arduino/ cannot simply #include core/ by relative path the way windows/,
-# raspberrypi/ and ros2/ do. Instead, arduino/WooDriveSdk.{h,cpp} is a
+# linux/ and ros2/ do. Instead, arduino/WooDriveSdk.{h,cpp} is a
 # generated copy of core/ -- always edit core/, then run this script before
 # committing.
 #

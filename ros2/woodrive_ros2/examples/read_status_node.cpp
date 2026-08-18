@@ -1,4 +1,4 @@
-// ROS 2 equivalent of raspberrypi/Example02_ReadStatus.cpp.
+// ROS 2 equivalent of linux/examples/Example02_ReadStatus.cpp.
 // A simple, one-shot node: connect, dump every config/status block once,
 // exit. No topics/services/actions -- see src/woodrive_node.cpp for the
 // full, persistent driver (which publishes ~/status continuously).

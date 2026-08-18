@@ -1,4 +1,4 @@
-// ROS 2 equivalent of raspberrypi/Example05_Position.cpp.
+// ROS 2 equivalent of linux/examples/Example05_Position.cpp.
 // A simple, one-shot node: home to position 0, move +, move -, home again,
 // exit. No topics/services/actions -- see src/woodrive_node.cpp's
 // ~/move_relative and ~/move_absolute actions for the persistent,

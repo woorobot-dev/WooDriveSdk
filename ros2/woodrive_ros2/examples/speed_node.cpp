@@ -1,4 +1,4 @@
-// ROS 2 equivalent of raspberrypi/Example04_Speed.cpp.
+// ROS 2 equivalent of linux/examples/Example04_Speed.cpp.
 // A simple, one-shot node: run the motor at +speed, stop, -speed, stop,
 // then demonstrate DIR_ZERO (velocity mode: "decelerate to zero speed"),
 // exit. No topics/services/actions -- see src/woodrive_node.cpp's

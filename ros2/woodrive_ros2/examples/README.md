@@ -2,7 +2,7 @@
 
 Five small, standalone nodes -- no topics, services, or actions. Each one
 connects, runs through one feature, prints the result via `RCLCPP_INFO`, and
-exits. They are the ROS 2 counterpart of `raspberrypi/Example01..05_*.cpp` /
+exits. They are the ROS 2 counterpart of `linux/examples/Example01..05_*.cpp` /
 `arduino/examples/Example01..05_*`, built directly against `core/WooDriveSdk.h`.
 
 For a persistent driver you can actually run a robot with (topics, services,

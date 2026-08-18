@@ -11,7 +11,7 @@ find_package(rclcpp REQUIRED)
 # Depends directly on core/ (same as woodrive_ros2) -- not on the
 # woodrive_ros2 *package*, since this robot doesn't need woodrive_ros2's
 # generic single-controller topics/services/actions, just the SDK itself.
-# Package lives at ros2/Robot/amr_2wheel_robot/, so core/ is three levels up.
+# Package lives at ros2/projects/amr_2wheel_robot/, so core/ is three levels up.
 add_executable(dual_motor_node
   src/dual_motor_node.cpp
   ../../../core/WooDriveSdk.cpp

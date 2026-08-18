@@ -2,7 +2,7 @@
 
 Robot-specific package for a 2-wheel AMR (Autonomous Mobile Robot) built on
 two WooDrive controllers (one per wheel, distinct protocol IDs on one
-RS-485 bus). Lives under `ros2/Robot/` -- a grouping folder for
+RS-485 bus). Lives under `ros2/projects/` -- a grouping folder for
 robot-level packages, as opposed to `ros2/woodrive_ros2` (the generic,
 robot-agnostic WooDrive SDK package). Kept **separate** from
 `woodrive_ros2` on purpose -- this package hardcodes robot-specific
@@ -29,7 +29,7 @@ directly against `../../../core/` (the same SDK `woodrive_ros2` uses).
 ## Prerequisites
 
 - Both controllers set to distinct protocol IDs (see `woodrive_ros2`'s
-  `dev/set_id_node` -- do this with only one controller on the bus at a
+  `tools/set_id_node` -- do this with only one controller on the bus at a
   time)
 - RS-485 bus at 1,000,000 bps, not the SDK's 9600 default (required for the
   1-10ms comm/control cycle to be physically possible)

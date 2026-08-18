@@ -1,0 +1,14 @@
+# colcon/ament build artifacts -- these get created wherever colcon is run
+# from (including accidentally at the repo root, or inside a package
+# folder directly) and should never be committed.
+build/
+install/
+log/
+
+# Plain Makefile/CMake build output (linux/, windows/, python/)
+*.o
+CMakeFiles/
+CMakeCache.txt
+
+# Linux example binaries (built by linux/Makefile, no extension)
+/linux/Example0[1-5]_*

@@ -1,4 +1,4 @@
-"""Equivalent of raspberrypi/Example01_BasicCheck.cpp using the Python bindings.
+"""Equivalent of linux/examples/Example01_BasicCheck.cpp using the Python bindings.
 
 Usage:
     python basic_check.py /dev/ttyUSB0      # Linux / macOS
